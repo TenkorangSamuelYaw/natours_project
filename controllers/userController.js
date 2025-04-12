@@ -36,6 +36,16 @@ export const updateMe = catchAsyncError(async (req, res, next) => {
   })
 });
 
+export const deleteMe = catchAsyncError(async (req, res, next) => {
+  // We don't necessarily delete the user, we set the active property to false(this way, they can reactivate their account)
+  await User.findByIdAndUpdate(req.user.id, {active: false});
+  // Because the active is set to fault, make sure all the query returns doesn't include the documents with active = false
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+})
+
 export const getUser = (req, res) => {
   res.status(500).json({
     status: 'error',
