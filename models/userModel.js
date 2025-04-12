@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { type } from 'os';
 
 // TODO Think of signing users in in the future using their usernames, for now I'm using their emails
 const userSchema = new mongoose.Schema({
@@ -42,10 +43,16 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 // NOTE Password encryption implemented below
 userSchema.pre('save', async function (next) {
+  // this points to current query, because this is a document middleware
   // Check if password is newly created(???) or been modified, then only you encrypt it
   if (!this.isModified('password')) {
     return next();
@@ -65,6 +72,12 @@ userSchema.pre('save', function (next) {
   this.passwordChangedAt = Date.now() - 1000; // Address latency issues (this will compensate for the time it will take to finish the db operation)
   next();
 });
+
+userSchema.pre(/^find/, function(next) {
+  // this points to current query because this is a query middleware
+  this.find({active: {$ne: false}}); // Use != false because some of the documents were created before the active property was added
+  next();
+})
 
 // Instance method, read more
 userSchema.methods.correctPassword = async function (
