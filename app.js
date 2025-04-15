@@ -8,6 +8,7 @@ import userRouter from './routes/userRoutes.js';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import {rateLimit} from 'express-rate-limit';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,11 +16,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // 2. MIDDLEWARES
-app.use(express.json()); // Middleware that parses data from the client to the server using req.body
+// Set Security HTTP headers
+app.use(helmet());
+
+// Middleware that parses data from the client to the server using req.body
+app.use(express.json({
+  limit: '10kb' // Limit data parsed in req.body to 10KB
+})); 
+
+//Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); // This middleware gives a log of the incoming request in the console
 }
-
+// Limit requests from same IP
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Allow 100 requests from same IP per which window(15 mins)
@@ -27,7 +36,9 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter); // Apply to all routes another /api
 
+// Serving static files
 app.use(express.static(`${__dirname}/public`));
+
 // Creating my own middleware here
 app.use((req, res, next) => {
     req.responseTime = new Date().toISOString();
