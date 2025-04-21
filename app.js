@@ -9,6 +9,9 @@ import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import {rateLimit} from 'express-rate-limit';
 import helmet from 'helmet';
+import monogoSanitize from 'express-mongo-sanitize';
+import {xss} from 'express-xss-sanitizer';
+import hpp from 'hpp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +26,9 @@ app.use(helmet());
 app.use(express.json({
   limit: '10kb' // Limit data parsed in req.body to 10KB
 })); 
+
+// Data sanitization against NO SQL query injection
+// Data sanitization against XSS(Cross site scripting)
 
 //Development logging
 if (process.env.NODE_ENV === 'development') {
@@ -44,6 +50,21 @@ app.use((req, res, next) => {
     req.responseTime = new Date().toISOString();
     next();
 });
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent parameter pollution
+app.use(hpp({
+  whitelist: [
+    'duration',
+    'ratingsQuantity',
+    'ratingsAverage',
+    'maxGroupSize',
+    'difficulty',
+    'price'
+  ]
+}));
 
 // 3. Mounting routers
 app.use('/api/v1/tours', tourRouter); // Middleware for tours route
