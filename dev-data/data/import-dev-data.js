@@ -5,16 +5,16 @@ import { Tour } from './../../models/tourModels.js' // Tour model from the datab
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: './../../config.env' });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname,'./../../config.env') });
 
 const port = process.env.PORT || 3000;
 
 // CONNECT TO THE DATABASE HERE
 const database = process.env.DATABASE.replace(
-  '<db_password>',
+  '<db_password>', 
   process.env.DATABASE_PASSWORD,
 );
 const connectDatabase = async () => {
@@ -30,7 +30,7 @@ const connectDatabase = async () => {
 connectDatabase();
 
 // READ JSON FILE
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/./tours-simple.json`, 'utf-8'));
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/./tours.json`, 'utf-8'));
 
 // IMPORT DATA INTO THE DATABASE
 const importData = async () => {

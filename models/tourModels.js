@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { type } from 'os';
 import slugify from 'slugify'
 const schemaOptions = {
   toJSON: { 
@@ -11,81 +12,117 @@ const schemaOptions = {
   toObject: { virtuals: true },
 };
 // Database schema or blueprint, describing the database, validation
-const tourSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'A tour must have a name'],
-    unique: true,
-    trim: true,
-    maxlength: [50, 'A tour must have 50 characters maximum']
+const tourSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'A tour must have a name'],
+      unique: true,
+      trim: true,
+      maxlength: [50, 'A tour must have 50 characters maximum'],
+    },
+    duration: {
+      type: Number,
+      required: [true, 'A tour must have a duration'],
+    },
+    maxGroupSize: {
+      type: Number,
+      required: [true, 'A tour must have a group size'],
+    },
+    difficulty: {
+      type: String,
+      required: [true, 'A tour must have a difficulty level'],
+      trim: true,
+      enum: [
+        {
+          values: ['easy', 'medium', 'difficult'],
+          message: 'Difficulty is either easy, medium or difficult',
+        },
+      ],
+    },
+    ratingsAverage: {
+      type: Number,
+      default: 4.5,
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
+    },
+    ratingsQuantity: {
+      type: Number,
+      default: 0,
+    },
+    price: {
+      type: Number,
+      required: [true, 'A tour must have a price'],
+    },
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          // Returns true if priceDiscount is less than actual price, else it raises an error
+          return val < this.price; // Why pass val, and we didn't use this.priceDiscount(Ask ChatGPT)
+        },
+        message: 'Discounted price {VALUE} should be less than actual price',
+      },
+    },
+    summary: {
+      type: String,
+      trim: true,
+      required: [true, 'A tour must have a description'],
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    imageCover: {
+      type: String,
+      required: [true, 'A tour must have a cover image'],
+    },
+    images: [String],
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+      select: false, // Don't return this as part of the query results
+    },
+    startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
+    // Embedded object
+    startLocation: {
+      // GeoJSON for geospatial data
+      type: {
+        type: String,
+        default: 'Point',
+        enum: {
+          values: ['Point'],
+          message: 'Geospatial data type can only be Point for now',
+        },
+      },
+      coordinates: [Number], // Accepts an array of numbers (LON first before LAT)
+      address: String,
+      description: String,
+    },
+    //Embed the location object into the tours collection
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: {
+            values: ['Point'],
+            message: 'Geospatial data type can only be Point for now',
+          },
+        },
+        coordinates: [Number], // Accepts an array of numbers (LON first before LAT)
+        address: String,
+        description: String,
+        day: Number
+      },
+    ],
   },
-  duration: {
-    type: Number,
-    required: [true, 'A tour must have a duration'],
-  },
-  maxGroupSize: {
-    type: Number,
-    required: [true, 'A tour must have a group size'],
-  },
-  difficulty: {
-    type: String,
-    required: [true, 'A tour must have a difficulty level'],
-    trim: true,
-    enum: [
-      {values: ['easy', 'medium', 'difficult'],
-        message: 'Difficulty is either easy, medium or difficult'
-      }
-    ]
-  },
-  ratingsAverage: {
-    type: Number,
-    default: 4.5,
-    min: [1, 'Rating must be above 1.0'],
-    max: [5, 'Rating must be below 5.0']
-  },
-  ratingsQuantity: {
-    type: Number,
-    default: 0,
-  },
-  price: {
-    type: Number,
-    required: [true, 'A tour must have a price'],
-  },
-  priceDiscount: {
-    type: Number,
-    validate: {
-      validator: function(val) {
-        // Returns true if priceDiscount is less than actual price, else it raises an error
-        return val < this.price; // Why pass val, and we didn't use this.priceDiscount(Ask ChatGPT)
-      }, 
-      message: 'Discounted price {VALUE} should be less than actual price'
-    }
-  },
-  summary: {
-    type: String,
-    trim: true,
-    required: [true, 'A tour must have a description']
-  },
-  description: {
-    type: String,
-    trim: true
-  },
-  imageCover: {
-    type: String,
-    required: [true, 'A tour must have a cover image']
-  },
-  images: [String],
-  createdAt: {
-    type: Date,
-    default: Date.now(),
-    select: false // Don't return this as part of the query results
-  },
-  startDates: [Date],
-  secretTour: {
-    type: Boolean,
-    default: false
-  }
-}, schemaOptions);
+  schemaOptions,
+);
 
 // NOTE Virtual properties added here, might be needful in AURA
 tourSchema.virtual('durationWeeks').get(function () {
