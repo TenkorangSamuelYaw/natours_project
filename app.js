@@ -28,6 +28,7 @@ app.use(express.json({
 })); 
 
 // Data sanitization against NO SQL query injection
+app.use(monogoSanitize());
 // Data sanitization against XSS(Cross site scripting)
 
 //Development logging
