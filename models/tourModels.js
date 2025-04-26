@@ -49,7 +49,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'Rating must be above 1.0'],
       max: [5, 'Rating must be below 5.0'],
-      validate: {
+      validate: { // Not doing anything for now
         validator: function (val) {
           return typeof val === 'number'; // must be a real number, not a string
         },
