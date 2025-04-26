@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 import { type } from 'os';
-import slugify from 'slugify'
+import slugify from 'slugify';
+
+const toLowercaseAndTrim = (val) =>
+  typeof val === 'string' ? val.trim().toLowerCase() : val;
+
 const schemaOptions = {
   toJSON: { 
     virtuals: true,
@@ -32,19 +36,25 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty level'],
-      trim: true,
       enum: [
         {
           values: ['easy', 'medium', 'difficult'],
           message: 'Difficulty is either easy, medium or difficult',
         },
       ],
+      set: toLowercaseAndTrim,
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
       min: [1, 'Rating must be above 1.0'],
       max: [5, 'Rating must be below 5.0'],
+      validate: {
+        validator: function (val) {
+          return typeof val === 'number'; // must be a real number, not a string
+        },
+        message: 'Rating must be a number, not a string',
+      },
     },
     ratingsQuantity: {
       type: Number,
@@ -117,7 +127,13 @@ const tourSchema = new mongoose.Schema(
         coordinates: [Number], // Accepts an array of numbers (LON first before LAT)
         address: String,
         description: String,
-        day: Number
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId, // expects a mongoose id
+        ref: 'User', // Establish relationship with the User model
       },
     ],
   },
@@ -150,6 +166,19 @@ tourSchema.post('save', function(doc, next) {
 tourSchema.pre(/^find/, function(next) {
   this.find({ secretTour: { $ne: true } }); // return all tours where secretTour is false
   this.start = Date.now(); // Won't be persisted in the database
+  next();
+});
+
+// Query middleware to populate tours model with the users related to the tours
+tourSchema.pre(/^find/, function(next) {
+  // Populate current query
+  this.populate({
+    path: 'guides', // populate the guides field
+    select: {
+      __v: 0,
+      passwordChangedAt: 0
+    }, // Exclude these fields from the population
+  });
   next();
 });
 
