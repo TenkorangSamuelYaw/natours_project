@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import reviewRouter from './routes/reviewRoutes.js';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import {rateLimit} from 'express-rate-limit';
@@ -70,6 +71,7 @@ app.use(hpp({
 // 3. Mounting routers
 app.use('/api/v1/tours', tourRouter); // Middleware for tours route
 app.use('/api/v1/users', userRouter); // Middleware for user route
+app.use('/api/v1/review', reviewRouter); // Middleware for review route
 
 // NOTE Handling unhadled routes in our code
 // 1. Make it sure it is last because if it comes before all the routes or in between the routes, it will be called before them
