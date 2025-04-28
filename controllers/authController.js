@@ -113,6 +113,8 @@ export const restrictTo = (...roles) => {
   // 2. Check if the current user's role exist in the roles array
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
+      console.log(roles);
+      console.log(req.user.role);
       return next(
         new AppError("You're not allowed to perform this operation", 403),
       );
