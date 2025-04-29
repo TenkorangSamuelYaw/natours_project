@@ -139,6 +139,12 @@ const tourSchema = new mongoose.Schema(
   },
   schemaOptions,
 );
+// TODO How do I access reviews on a certain tour??
+tourSchema.virtual('reviews', { // name of virtual field here is reviews
+  ref: 'Review', // reference the Review model
+  foreignField: 'tour',
+  localField: '_id'
+});
 
 // NOTE Virtual properties added here, might be needful in AURA
 tourSchema.virtual('durationWeeks').get(function () {
