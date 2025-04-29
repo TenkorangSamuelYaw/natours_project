@@ -60,10 +60,14 @@ reviewSchema.pre(/^find/, function (next) {
     name: 1,
     photo: 1
   };
+//   this.populate({
+//     path: 'tour',
+//     select: tourSelectOptions,
+//   }).populate({
+//     path: 'user',
+//     select: userSelectOptions
+//   });
   this.populate({
-    path: 'tour',
-    select: tourSelectOptions,
-  }).populate({
     path: 'user',
     select: userSelectOptions
   });
