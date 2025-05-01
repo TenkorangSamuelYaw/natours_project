@@ -9,7 +9,7 @@ import {
 
 import { restrictTo, protect } from './../controllers/authController.js';
 
-const router = express.Router();
+const router = express.Router({mergeParams: true}); 
 
 router
   .route('/')
