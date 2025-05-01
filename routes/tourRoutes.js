@@ -1,9 +1,13 @@
 import express from 'express';
 import {getMonthlyPlan, getTourStats, aliasTopTours ,getTours, getTour, createTour, updateTour, deleteTour } from '../controllers/tourController.js';
 import { protect, restrictTo } from './../controllers/authController.js';
+import reviewRouter from './../routes/reviewRoutes.js'
 
 
 const router = express.Router();
+
+router.use('/:tourId/reviews', reviewRouter);
+router.use('/:tourId/reviews/:reviewId', reviewRouter);
 
 // router.param('id', checkID); // Anytime the tours endpoint is hit, this middleware checks if the ID is valid
 
