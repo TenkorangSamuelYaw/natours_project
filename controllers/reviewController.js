@@ -1,7 +1,7 @@
 import AppError from './../utils/appError.js';
 import { Review } from './../models/reviewModels.js';
 import catchAsyncError from './../utils/catchAsync.js';
-import { deleteOne } from './handlerFactory.js';
+import { deleteOne, updateOne } from './handlerFactory.js';
 
 export const getAllReviews = catchAsyncError(async (req, res, next) => {
     let filter = {}
@@ -48,21 +48,7 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     });
 });
 
-export const updateReview = catchAsyncError(async (req, res, next) => {
-    const updatedReview = await Review.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true
-    });
-    if (!updatedReview) {
-      return next(new AppError(`No review found with the ID: ${req.params.id}`));
-    }
-    res.status(200).json({
-      status: 'success',
-      data: {
-        updatedReview: updatedReview,
-      },
-    });
-});
+export const updateReview = updateOne(Review);
 
 export const deleteReview = deleteOne(Review);
 
