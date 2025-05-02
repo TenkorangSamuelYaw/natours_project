@@ -4,6 +4,7 @@ import {Tour} from './../models/tourModels.js'; // Tour model from the database
 import APIFeatures from './../utils/apiFeatures.js'; // API class
 import catchAsyncError from './../utils/catchAsync.js'; 
 import AppError from './../utils/appError.js';
+import {deleteOne} from './handlerFactory.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -84,18 +85,7 @@ export const updateTour = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const deleteTour = catchAsyncError(async (req, res, next) => {
-  const deletedTour = await Tour.findByIdAndDelete(req.params.id);
-  if (!deletedTour) {
-    return next(
-      new AppError(`No tour found with the ID: ${req.params.id}`, 404),
-    );
-  }
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+export const deleteTour = deleteOne(Tour);
 
 // Handler for tour statistics
 export const getTourStats = catchAsyncError(async (req, res, next) => {
