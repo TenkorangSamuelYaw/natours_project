@@ -1,6 +1,7 @@
 import AppError from '../utils/appError.js';
 import {User} from './../models/userModel.js';
 import catchAsyncError from './../utils/catchAsync.js';
+import { deleteOne } from './handlerFactory.js';
 
 
 export const getAllUsers = catchAsyncError(async(req, res, next) => {
@@ -67,9 +68,5 @@ export const updateUser = (req, res) => {
   });
 };
 
-export const deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet implemented',
-  });
-};
+// NOTE Admin is the one in charge of this route
+export const deleteUser = deleteOne(User);

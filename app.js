@@ -71,7 +71,7 @@ app.use(hpp({
 // 3. Mounting routers
 app.use('/api/v1/tours', tourRouter); // Middleware for tours route
 app.use('/api/v1/users', userRouter); // Middleware for user route
-app.use('/api/v1/review', reviewRouter); // Middleware for review route
+app.use('/api/v1/reviews', reviewRouter); // Middleware for review route
 
 // NOTE Handling unhadled routes in our code
 // 1. Make it sure it is last because if it comes before all the routes or in between the routes, it will be called before them

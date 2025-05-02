@@ -1,6 +1,7 @@
 import AppError from './../utils/appError.js';
 import { Review } from './../models/reviewModels.js';
 import catchAsyncError from './../utils/catchAsync.js';
+import { deleteOne } from './handlerFactory.js';
 
 export const getAllReviews = catchAsyncError(async (req, res, next) => {
     let filter = {}
@@ -63,17 +64,6 @@ export const updateReview = catchAsyncError(async (req, res, next) => {
     });
 });
 
-export const deleteReview = catchAsyncError(async (req, res, next) => {
-  const deletedReview = await Review.findByIdAndDelete(req.params.id);
-  if (!deletedReview) {
-    return next(
-      new AppError(`No review found with the ID: ${req.params.id}`, 404),
-    );
-  }
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+export const deleteReview = deleteOne(Review);
 
 // NOTE goal is to access the reviews on tours, when no user id, tour id is specified
