@@ -3,7 +3,10 @@ import { Review } from './../models/reviewModels.js';
 import catchAsyncError from './../utils/catchAsync.js';
 
 export const getAllReviews = catchAsyncError(async (req, res, next) => {
-    const reviews = await Review.find();
+    let filter = {}
+    if(req.params.tourId) filter = { tour: req.params.tourId };
+    // The two lines above help to get all the reviews on a particular tour
+    const reviews = await Review.find(filter); // Where as an empty filter returns all the reviews void of a tour
     res.status(200).json({
         status: 'success',
         results: reviews.length,
@@ -50,7 +53,7 @@ export const updateReview = catchAsyncError(async (req, res, next) => {
         runValidators: true
     });
     if (!updatedReview) {
-      return next(new AppError(`No review found with the ID: ${req.user.id}`));
+      return next(new AppError(`No review found with the ID: ${req.params.id}`));
     }
     res.status(200).json({
       status: 'success',
