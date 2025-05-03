@@ -54,12 +54,13 @@ export const getUser = (req, res) => {
   });
 };
 
-export const createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet implemented',
-  });
-};
+// NOTE Implemented in the authentication handler
+// export const createUser = (req, res) => {
+//   res.status(500).json({
+//     status: 'error',
+//     message: 'This route is not yet implemented',
+//   });
+// };
 
 export const updateUser = updateOne(User);
 // NOTE Admin is the one in charge of this route

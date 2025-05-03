@@ -1,7 +1,7 @@
 import AppError from './../utils/appError.js';
 import { Review } from './../models/reviewModels.js';
 import catchAsyncError from './../utils/catchAsync.js';
-import { deleteOne, updateOne } from './handlerFactory.js';
+import { createOne, deleteOne, updateOne } from './handlerFactory.js';
 
 export const getAllReviews = catchAsyncError(async (req, res, next) => {
     let filter = {}
@@ -32,21 +32,15 @@ export const getReview = catchAsyncError(async (req, res, next) => {
     });
 });
 
-export const createReview = catchAsyncError(async (req, res, next) => {
-    let {review, tour, user, rating} = req.body;
-    // NOTE Nested routes implementation
-    // If there's no user id specified in the body of the request, get it from the current logged in user
-    if(!user) user = req.user.id;
-    // If there's no tour id specified in the body, get it from req.params
-    if(!tour) tour = req.params.tourId; // merge paramters functionality works here
-    const newReview = await Review.create({ review, tour, user, rating}); // Remember to pass a destructured object instead of req.body
-    res.status(201).json({
-        status: 'success',
-        data: {
-            review: newReview
-        }
-    });
-});
+export const setTourAndUserIds = (req, res, next) => {
+  // If there's no user id specified in the body of the request, get it from the current logged in user
+  if (!req.body.user) req.body.user = req.user.id;
+  // If there's no tour id specified in the body, get it from req.params
+  if (!req.body.tour) req.body.tour = req.params.tourId; // merge paramters functionality works here
+  next();
+}
+
+export const createReview = createOne(Review);
 
 export const updateReview = updateOne(Review);
 

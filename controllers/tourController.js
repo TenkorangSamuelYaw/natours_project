@@ -4,7 +4,7 @@ import {Tour} from './../models/tourModels.js'; // Tour model from the database
 import APIFeatures from './../utils/apiFeatures.js'; // API class
 import catchAsyncError from './../utils/catchAsync.js'; 
 import AppError from './../utils/appError.js';
-import {deleteOne, updateOne} from './handlerFactory.js';
+import {deleteOne, updateOne, createOne} from './handlerFactory.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -57,15 +57,7 @@ export const getTour = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const createTour = catchAsyncError(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
+export const createTour = createOne(Tour);
 
 export const updateTour = updateOne(Tour);
 
