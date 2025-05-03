@@ -5,6 +5,7 @@ import {
   createReview,
   updateReview,
   deleteReview,
+  setTourAndUserIds
 } from './../controllers/reviewController.js';
 
 import { restrictTo, protect } from './../controllers/authController.js';
@@ -14,7 +15,7 @@ const router = express.Router({mergeParams: true});
 router
   .route('/')
   .get(getAllReviews) // Must users be logged in before they get access to reviews???
-  .post(protect, restrictTo('user'), createReview);
+  .post(protect, restrictTo('user'), setTourAndUserIds, createReview);
 
 router
   .route('/:id')

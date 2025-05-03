@@ -2,9 +2,8 @@ import express from 'express';
 import {
   getAllUsers,
   updateMe,
-  deleteMe,
+  deleteMe, 
   getUser,
-  createUser,
   updateUser,
   deleteUser,
 } from '../controllers/userController.js';
@@ -30,9 +29,13 @@ router.patch('/updateMyPassword', protect, updatePassword);
 router.patch('/updateMe', protect, updateMe);
 router.delete('/deleteMe', protect, deleteMe); // When the user deletes his account, it is removed but made inactive
 
-router.route('/').get(getAllUsers).post(createUser);
+router.route('/').get(getAllUsers).post(); //Nothing to run in the post request for now
 
-router.route('/:id').get(getUser).patch(updateUser).delete(protect, restrictTo('admin'), deleteUser); // Only admins can permanently remove users
+router
+  .route('/:id')
+  .get(getUser)
+  .patch(protect, updateUser)
+  .delete(protect, restrictTo('admin'), deleteUser); // Only admins can permanently remove users
 
 export default router; // ES 6 approach
 // module.exports = router; Common JS approach
