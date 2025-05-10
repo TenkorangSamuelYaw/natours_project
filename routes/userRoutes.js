@@ -4,6 +4,7 @@ import {
   updateMe,
   deleteMe, 
   getUser,
+  createUser,
   updateUser,
   deleteUser,
 } from '../controllers/userController.js';
@@ -29,7 +30,7 @@ router.patch('/updateMyPassword', protect, updatePassword);
 router.patch('/updateMe', protect, updateMe);
 router.delete('/deleteMe', protect, deleteMe); // When the user deletes his account, it is removed but made inactive
 
-router.route('/').get(getAllUsers).post(); //Nothing to run in the post request for now
+router.route('/').get(getAllUsers).post(createUser); // In future see how when someone is on this endpoint, the person will be redirected to /signUp
 
 router
   .route('/:id')

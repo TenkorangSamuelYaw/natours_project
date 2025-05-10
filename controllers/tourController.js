@@ -1,10 +1,8 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {Tour} from './../models/tourModels.js'; // Tour model from the database
-import APIFeatures from './../utils/apiFeatures.js'; // API class
 import catchAsyncError from './../utils/catchAsync.js'; 
-import AppError from './../utils/appError.js';
-import {deleteOne, updateOne, createOne} from './handlerFactory.js';
+import {deleteOne, updateOne, createOne, getOne, getAll} from './handlerFactory.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,42 +18,10 @@ export const aliasTopTours = (req, res, next) => {
   next();
 }
 
-/* 
-  *** The async function is stored in the fn variable ***
-  *** Understand catchAsyncError better from the decorators point of view ***
-*/
 
-export const getTours = catchAsyncError(async (req, res, next) => {
-  // EXECUTE QUERY
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitfields()
-    .paginate();
-  const tours = await features.query;
+export const getTours = getAll(Tour);
 
-  // SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-});
-
-export const getTour = catchAsyncError(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate({path: 'reviews'}) // Find a document by it's id
-  if (!tour) {
-    return next(new AppError(`No tour found with the ID: ${req.params.id}`, 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: tour, // In ES 6 because the key-value have the same name, one can be dropped => {tour}
-    },
-  });
-});
+export const getTour = getOne(Tour, {path: 'reviews'});
 
 export const createTour = createOne(Tour);
 
