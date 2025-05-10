@@ -1,19 +1,10 @@
 import AppError from '../utils/appError.js';
 import {User} from './../models/userModel.js';
 import catchAsyncError from './../utils/catchAsync.js';
-import { deleteOne, updateOne } from './handlerFactory.js';
+import { deleteOne, getAll, getOne, updateOne } from './handlerFactory.js';
 
 
-export const getAllUsers = catchAsyncError(async(req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users: users
-    }
-  });
-});
+export const getAllUsers = getAll(User);
 // NOTE User data updated here, user password updated in the authController
 export const updateMe = catchAsyncError(async (req, res, next) => {
   // 1. Check and create error if user tried to update password
@@ -47,20 +38,15 @@ export const deleteMe = catchAsyncError(async (req, res, next) => {
   });
 })
 
-export const getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet implemented',
-  });
-};
+export const getUser = getOne(User);
 
 // NOTE Implemented in the authentication handler
-// export const createUser = (req, res) => {
-//   res.status(500).json({
-//     status: 'error',
-//     message: 'This route is not yet implemented',
-//   });
-// };
+export const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: "Use '/signUp' to create a new user",
+  });
+};
 
 export const updateUser = updateOne(User);
 // NOTE Admin is the one in charge of this route
