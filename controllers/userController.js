@@ -3,8 +3,12 @@ import {User} from './../models/userModel.js';
 import catchAsyncError from './../utils/catchAsync.js';
 import { deleteOne, getAll, getOne, updateOne } from './handlerFactory.js';
 
+// Middleware to pass the currently logged in users id as a req param
+export const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+}
 
-export const getAllUsers = getAll(User);
 // NOTE User data updated here, user password updated in the authController
 export const updateMe = catchAsyncError(async (req, res, next) => {
   // 1. Check and create error if user tried to update password
@@ -38,7 +42,7 @@ export const deleteMe = catchAsyncError(async (req, res, next) => {
   });
 })
 
-export const getUser = getOne(User);
+
 
 // NOTE Implemented in the authentication handler
 export const createUser = (req, res) => {
@@ -47,7 +51,8 @@ export const createUser = (req, res) => {
     message: "Use '/signUp' to create a new user",
   });
 };
-
+export const getAllUsers = getAll(User);
+export const getUser = getOne(User);
 export const updateUser = updateOne(User);
 // NOTE Admin is the one in charge of this route
 export const deleteUser = deleteOne(User);
