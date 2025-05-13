@@ -2,6 +2,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Tour } from './../../models/tourModels.js' // Tour model from the database
+import { User } from './../../models/userModel.js' // User model from the database
+import { Review } from './../../models/reviewModels.js' // Review model from the database
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
@@ -31,11 +33,15 @@ connectDatabase();
 
 // READ JSON FILE
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/./tours.json`, 'utf-8'));
+const users = JSON.parse(fs.readFileSync(`${__dirname}/./users.json`, 'utf-8'));
+const reviews = JSON.parse(fs.readFileSync(`${__dirname}/./reviews.json`, 'utf-8'));
 
 // IMPORT DATA INTO THE DATABASE
 const importData = async () => {
     try {
         await Tour.create(tours); // Each object in the tours array is treated as a document
+        await User.create(users, {validateBeforeSave: false}); // Each object in the users array is treated as a document
+        await Review.create(reviews); // Each object in the reviews array is treated as a document
         console.log('Data successfully loaded');
     } catch (error) {
         console.log(error);
@@ -48,6 +54,8 @@ const importData = async () => {
 const deleteData = async () => {
     try {
         await Tour.deleteMany();
+        await User.deleteMany();
+        await Review.deleteMany();
         console.log('Data successfully deleted');
     } catch (error) {
         console.log(error);
