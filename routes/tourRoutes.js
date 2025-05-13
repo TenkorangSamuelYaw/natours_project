@@ -21,18 +21,18 @@ router
 .get(getTourStats);
 
 router
-.route('/monthly-plan/:year')
-.get(getMonthlyPlan);
+  .route('/monthly-plan/:year')
+  .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
 router
 .route('/')
-.get(protect, getTours)
-.post(createTour);
+.get(getTours)
+.post(protect, restrictTo('admin', 'lead-guide'), createTour); // Only admins and lead guides can create new tours
 
 router
 .route('/:id')
 .get(getTour)
-.patch(updateTour)
+.patch(protect, restrictTo('admin', 'lead-guide'), updateTour)
 .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
 
 export default router; 
