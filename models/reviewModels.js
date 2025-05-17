@@ -45,6 +45,9 @@ const reviewSchema = new mongoose.Schema(
   schemaOptions,
 );
 
+// Allow a user to only create one review on a particular tour
+reviewSchema.index({ tour: 1, user: 1}, {unique: true});
+
 // Query middleware for populating tour and user data into each review
 reviewSchema.pre(/^find/, function (next) {
   const tourSelectOptions = {
