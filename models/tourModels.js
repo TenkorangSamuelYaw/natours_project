@@ -139,8 +139,13 @@ const tourSchema = new mongoose.Schema(
   },
   schemaOptions,
 );
+// tourSchema.index({ price: 1}); // Single index for read performance
+tourSchema.index({ price: 1, ratingsAverage: -1}); // Compound index for double filter queries
+tourSchema.index({ slug: 1 }); // Find out why the slug is so important
+
 // TODO How do I access reviews on a certain tour??
-tourSchema.virtual('reviews', { // name of virtual field here is reviews
+tourSchema.virtual('reviews', { 
+  // name of virtual field here is reviews
   ref: 'Review', // reference the Review model
   foreignField: 'tour',
   localField: '_id'
