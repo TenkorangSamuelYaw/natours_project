@@ -144,6 +144,7 @@ const tourSchema = new mongoose.Schema(
 // tourSchema.index({ price: 1}); // Single index for read performance
 tourSchema.index({ price: 1, ratingsAverage: -1}); // Compound index for double filter queries
 tourSchema.index({ slug: 1 }); // Find out why the slug is so important
+tourSchema.index({startLocation: '2dsphere'}); // This type of index is needed for geospatial queries to work
 
 // TODO How do I access reviews on a certain tour??
 tourSchema.virtual('reviews', { 
