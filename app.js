@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
+import viewRouter from './routes/viewRoutes.js'
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
 import {rateLimit} from 'express-rate-limit';
@@ -18,6 +19,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 // 2. MIDDLEWARES
 // Set Security HTTP headers
@@ -45,7 +48,7 @@ const limiter = rateLimit({
 app.use('/api', limiter); // Apply to all routes another /api
 
 // Serving static files
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Creating my own middleware here
 app.use((req, res, next) => {
@@ -69,6 +72,7 @@ app.use(hpp({
 }));
 
 // 3. Mounting routers
+app.use('/', viewRouter); // All view routes mounted on the root route
 app.use('/api/v1/tours', tourRouter); // Middleware for tours route
 app.use('/api/v1/users', userRouter); // Middleware for user route
 app.use('/api/v1/reviews', reviewRouter); // Middleware for review route
