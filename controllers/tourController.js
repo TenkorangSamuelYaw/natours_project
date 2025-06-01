@@ -149,3 +149,55 @@ export const getToursWithin = catchAsyncError(async (req, res, next) => {
     },
   });
 });
+
+
+/**
+ * @desc   Get all tours with their distnaces using my current location as reference
+ * @route  GET /api/v1/distances/center/:latlng/unit/:unit
+ * @param  {String} latlng - Latitude and longitude in 'lat,lng' format
+ * @param  {String} unit - Unit of distance ('mi' for miles, 'km' for kilometers)
+ * @access Public
+ */
+export const getDistances = catchAsyncError(async (req, res, next) => {
+  const {latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi'? 0.000621371 : 0.001;
+
+  // Validate that latitude and longitude are provided
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400,
+      ),
+    );
+  }   
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [parseFloat(lng), parseFloat(lat)],
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier,
+      },
+    },
+    // Display only the name and distances of the tours
+    {
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances,
+    },
+  });
+});
