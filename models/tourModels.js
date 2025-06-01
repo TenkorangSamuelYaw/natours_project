@@ -106,12 +106,13 @@ const tourSchema = new mongoose.Schema(
       type: {
         type: String,
         default: 'Point',
-        enum: {
-          values: ['Point'],
-          message: 'Geospatial data type can only be Point for now',
-        },
+        enum: ['Point'],
+        required: true
       },
-      coordinates: [Number], // Accepts an array of numbers (LON first before LAT)
+      coordinates: {
+        type: [Number],
+        required: true
+      }, // Accepts an array of numbers (LON first before LAT)
       address: String,
       description: String,
     },
@@ -203,10 +204,7 @@ tourSchema.post(/^find/, function(docs, next) {
 });
 
 // NOTE Aggregation Middleware used here
-tourSchema.pre('aggregate', function(next) {
-  // this.pipeline() returns an array containing all the aggregations we passed
-  this.pipeline().unshift({$match: {secretTour: {$ne: true}}});
-  next();
-});
+
 // Creating a model(table) from the schema
 export const Tour = mongoose.model('Tour', tourSchema);
+
