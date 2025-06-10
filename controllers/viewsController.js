@@ -4,8 +4,12 @@ import catchAsyncError from "./../utils/catchAsync.js";
 
 export const getOverview = catchAsyncError(async (req, res, next) => {
   // TODO 1. Get all tours from Tour DB
-  const tours = await Tourfind();
+  const tours = await Tour.find();
+  for (let index = 0; index < tours.length; index++) {
+    console.log(tours[index].slug);
+  }
   // TODO 2. Build template
+
   // TODO 3. Render template with data from step 1
   res.status(200).render('overview', {
     title: 'All tours',

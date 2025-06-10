@@ -1,5 +1,5 @@
 import express from 'express';
-import {getMonthlyPlan, getTourStats, aliasTopTours ,getTours, getTour, getToursWithin, createTour, updateTour, deleteTour, getDistances } from '../controllers/tourController.js';
+import {getMonthlyPlan, getTourStats, aliasTopTours ,getTours, getTour, getToursWithin, createTour, updateTour, deleteTour, getDistances, getNearbyToursWithDistance } from '../controllers/tourController.js';
 import { protect, restrictTo } from './../controllers/authController.js';
 import reviewRouter from './../routes/reviewRoutes.js'
 
@@ -27,6 +27,10 @@ router
 router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(getToursWithin);
 
 router.route('/distances/center/:latlng/unit/:unit').get(getDistances);
+
+router
+  .route('/tours-nearby/:distance/center/:latlng/unit/:unit')
+  .get(getNearbyToursWithDistance);
 
 router
 .route('/')
