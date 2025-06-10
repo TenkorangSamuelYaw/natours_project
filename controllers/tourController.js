@@ -201,3 +201,75 @@ export const getDistances = catchAsyncError(async (req, res, next) => {
     },
   });
 });
+
+
+/**
+ * @desc    Get all tours within a specified distance from a given location,
+ *          along with the actual distance of each tour from the center point.
+ * @route   GET /api/v1/tours/tours-nearby/:distance/center/:latlng/unit/:unit
+ * @param   {Number} distance - The maximum distance from the center point (in mi or km)
+ * @param   {String} latlng - The center point in 'lat,lng' format (e.g., "37.7749,-122.4194")
+ * @param   {String} unit - The unit of distance ('mi' for miles, 'km' for kilometers)
+ * @access  Public
+ * @returns {Object} JSON response with nearby tours and their respective distances
+ */
+export const getNearbyToursWithDistance = catchAsyncError(
+  async (req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+
+    if (!lat || !lng) {
+      return next(
+        new AppError(
+          'Please provide latitude and longitude in the format lat,lng',
+          400,
+        ),
+      );
+    }
+
+    // Radius in radians
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+    // Distance multiplier to convert from meters to desired unit
+    const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+    // GeoNear must be first in aggregation and needs a geospatial index on startLocation
+    const tours = await Tour.aggregate([
+      {
+        // Calculate the distances from my current location to all the tours
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [parseFloat(lng), parseFloat(lat)],
+          },
+          distanceField: 'distance',
+          distanceMultiplier: multiplier,
+          spherical: true,
+        },
+      },
+      {
+        // Filter only tours within the specified range
+        $match: {
+          distance: { $lte: parseFloat(distance) },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          distance: 1,
+          price: 1,
+          summary: 1,
+          startLocation: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        data: tours,
+      },
+    });
+  },
+);
