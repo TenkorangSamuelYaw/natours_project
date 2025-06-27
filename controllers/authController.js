@@ -75,6 +75,8 @@ export const protect = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if(req.cookies.jwt) {
+    token = req.cookies.jwt
   }
 
   if (!token) {
@@ -105,6 +107,37 @@ export const protect = catchAsyncError(async (req, res, next) => {
   }
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  next();
+});
+
+export const isLoggedIn = catchAsyncError(async (req, res, next) => {
+  // 1. Check if the token exist in the req
+  console.log('🔍 Incoming cookie:', req.cookies.jwt);
+  if(req.cookies.jwt) {  
+    // 1. Verify token
+    const decoded = await promisify(jsonwebtoken.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+    
+    // 2. Check if user accessing the route exist
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+  
+    // 3. Check if user changed password after token was issued
+    if (currentUser.passwordChangedAfter(decoded.iat)) {
+      return next();
+    }
+    // THERE IS A LOGGED IN USER
+    res.locals.user = currentUser;
+    console.log('✅ Logged in user:', res.locals.user.name);
+    // console.log(currentUser);
+    return next();
+
+  }
+  // If there is no cookie, call next immediately
   next();
 });
 
@@ -197,7 +230,7 @@ export const updatePassword = catchAsyncError(async (req, res, next) => {
       new AppError('Your current password is invalid. Try again', 401),
     );
   }
-  // 3. If password is correct, update the password
+  // 3. If password is correct, update the password 
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.confirmNewPassword;
   await user.save();

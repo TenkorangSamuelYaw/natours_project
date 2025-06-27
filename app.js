@@ -14,6 +14,7 @@ import helmet from 'helmet';
 import monogoSanitize from 'express-mongo-sanitize';
 import {xss} from 'express-xss-sanitizer';
 import hpp from 'hpp';
+import cookieParser from 'cookie-parser'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,12 +25,51 @@ app.set('views', path.join(__dirname, 'views'));
 
 // 2. MIDDLEWARES
 // Set Security HTTP headers
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+
+      // Allow JS, including blob workers and Mapbox scripts
+      scriptSrc: ["'self'", 'https://api.mapbox.com', "https://cdn.jsdelivr.net", 'blob:'],
+
+      // Allow CSS, including Google Fonts and Mapbox styles
+      styleSrc: [
+        "'self'",
+        'https://api.mapbox.com',
+        'https://fonts.googleapis.com',
+        "'unsafe-inline'",
+      ],
+
+      // Allow fonts from Google Fonts
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+
+      // Allow data fetches to your origin, Mapbox APIs, and Mapbox events
+      connectSrc: [
+        "'self'",
+        'https://api.mapbox.com',
+        'https://events.mapbox.com',
+      ],
+
+      // Images from your server, inline data, and Mapbox tiles
+      imgSrc: ["'self'", 'data:', 'https://api.mapbox.com'],
+
+      // Workers (for Mapbox’s web workers)
+      workerSrc: ["'self'", 'blob:'],
+
+      // Deny everything else
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  }),
+);
 
 // Middleware that parses data from the client to the server using req.body
 app.use(express.json({
   limit: '10kb' // Limit data parsed in req.body to 10KB
 })); 
+
+app.use(cookieParser()); // read cookie from the browser when user makes a request
 
 // Data sanitization against NO SQL query injection
 app.use(monogoSanitize());
@@ -53,6 +93,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Creating my own middleware here
 app.use((req, res, next) => {
     req.responseTime = new Date().toISOString();
+    console.log(req.cookies); // Log the cookie coming from the req
     next();
 });
 
