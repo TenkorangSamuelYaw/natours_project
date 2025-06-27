@@ -1,0 +1,82 @@
+extend base
+
+block content 
+    .signup-container
+      h1.title CREATE YOUR ACCOUNT
+      
+      form#signupForm.signupForm(enctype="multipart/form-data")
+        .avatar-upload
+          .avatar-preview#avatarPreview
+            .avatar-placeholder Click to add photo
+          input(type="file", id="avatarFile", name="avatar", accept="image/*")
+          label.avatar-label(for="avatarFile") Choose Profile Picture
+        
+        .form-group
+          label(for="firstName") First Name
+          input(type="text", id="firstName", name="firstName", placeholder="John", required)
+        
+        .form-group
+          label(for="lastName") Last Name
+          input(type="text", id="lastName", name="lastName", placeholder="Doe", required)
+        
+        .form-group
+          label(for="email") Email address
+          input(type="email", id="email", name="email", placeholder="you@example.com", required)
+        
+        .form-group
+          label(for="password") Password
+          input(type="password", id="password", name="password", placeholder="••••••••", required)
+        
+        .form-group
+          label(for="confirmPassword") Confirm Password
+          input(type="password", id="confirmPassword", name="confirmPassword", placeholder="••••••••", required)
+        
+        .form-group.role-selection
+          label Account Type
+          .radio-group
+            .radio-item
+              input(type="radio", id="user", name="role", value="user", checked)
+              label(for="user")
+                div Tourist/Traveler
+                .role-description Book tours and explore destinations
+            
+            .radio-item
+              input(type="radio", id="guide", name="role", value="guide")
+              label(for="guide")
+                div Tour Guide
+                .role-description Lead tours and assist travelers
+            
+            .radio-item
+              input(type="radio", id="lead-guide", name="role", value="lead-guide")
+              label(for="lead-guide")
+                div Lead Guide
+                .role-description Supervise guides and manage tour operations
+            
+            .radio-item
+              input(type="radio", id="admin", name="role", value="admin")
+              label(for="admin")
+                div Administrator
+                .role-description Full system access and management
+        
+        .checkbox-group
+          input(type="checkbox", id="terms", name="terms", required)
+          label(for="terms") I agree to the Terms of Service and Privacy Policy
+        
+        input(type="hidden", id="secretCode", name="secretCode", value="")
+        
+        button.signup-btn(type="submit") SIGN UP
+      
+      .login-link
+        | Already have an account? 
+        a(href="/login") Log in here
+    
+    // Admin Secret Code Modal
+    .modal#adminModal
+      .modal-content
+        h2.modal-title 🔐 Admin Access Required
+        p.modal-description
+          | Admin accounts require special authorization. Please enter the secret code provided by your system administrator.
+        input.secret-input#adminSecretInput(type="password", placeholder="Enter secret code", maxlength="20")
+        .modal-buttons
+          button.modal-btn.confirm-btn#confirmSecret Confirm
+          button.modal-btn.cancel-btn#cancelSecret Cancel
