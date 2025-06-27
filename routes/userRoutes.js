@@ -19,10 +19,13 @@ import {
   restrictTo,
 } from '../controllers/authController.js';
 
+import { uploadUserPhoto } from '../controllers/fileUploadController.js';
+import { handleMulterError } from '../utils/handleMulterError.js';
+
 const router = express.Router();
 
 // You don't need to be logged in to perform any of the actions below
-router.post('/signup', signUp);
+router.post('/signup', router.post('/signup', uploadUserPhoto, handleMulterError, signUp));
 router.post('/login', login);
 router.post('/forgotPassword', forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);

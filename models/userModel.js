@@ -5,50 +5,69 @@ import crypto from 'crypto';
 import { type } from 'os';
 
 // TODO Think of signing users in in the future using their usernames, for now I'm using their emails
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'A user must have a name'],
-  },
-  email: {
-    type: String,
-    required: [true, 'A user must have an email'],
-    unique: true,
-    lowerCase: true,
-    validate: [validator.isEmail, 'Please provide a valid email'],
-  },
-  password: {
-    type: String,
-    required: [true, 'Please provide a password'],
-    minlength: 8,
-    select: false,
-  },
-  confirmPassword: {
-    type: String,
-    required: [true, 'Please confirm your password'],
-    validate: {
-      // This only works on CREATE and SAVE!!!, Won't work on updating users password
-      validator: function (el) {
-        return el === this.password; // el represents current confirmPassword
-      },
-      message: "Passwords don't match",
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'A user must have a name'],
     },
+    email: {
+      type: String,
+      required: [true, 'A user must have an email'],
+      unique: true,
+      lowerCase: true,
+      validate: [validator.isEmail, 'Please provide a valid email'],
+    },
+    password: {
+      type: String,
+      required: [true, 'Please provide a password'],
+      minlength: 8,
+      select: false,
+    },
+    confirmPassword: {
+      type: String,
+      required: [true, 'Please confirm your password'],
+      validate: {
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: "Passwords don't match",
+      },
+    },
+    photo: String, // Keep your existing photo field - this will store the sequential naming
+    passwordChangedAt: Date,
+    role: {
+      type: String,
+      enum: ['user', 'guide', 'lead-guide', 'admin'],
+      default: 'user',
+    },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
+    // NEW FIELDS FOR ENHANCED FUNCTIONALITY
+    adminVerified: {
+      type: Boolean,
+      default: false,
+    },
+    adminVerifiedAt: Date,
+    isStaff: {
+      type: Boolean,
+      default: false,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    lastLogin: Date,
   },
-  photo: String,
-  passwordChangedAt: Date,
-  role: {
-    type: String,
-    enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user',
+  {
+    timestamps: true, // This adds createdAt and updatedAt automatically
   },
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  active: {
-    type: Boolean,
-    default: true,
-    select: false
-  }
-});
+);
 
 // NOTE Password encryption implemented below
 userSchema.pre('save', async function (next) {
@@ -70,6 +89,20 @@ userSchema.pre('save', function (next) {
   // 3. IF the above check fails, the password has been modified
   console.log("Password modified");
   this.passwordChangedAt = Date.now() - 1000; // Address latency issues (this will compensate for the time it will take to finish the db operation)
+  next();
+});
+
+// NEW: Set staff status based on role
+userSchema.pre('save', function (next) {
+  if (this.isModified('role')) {
+    this.isStaff = ['guide', 'lead-guide', 'admin'].includes(this.role);
+    
+    // Set admin verification if admin role
+    if (this.role === 'admin' && !this.adminVerified) {
+      this.adminVerified = true;
+      this.adminVerifiedAt = new Date();
+    }
+  }
   next();
 });
 
@@ -111,5 +144,26 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // Expires in 10 mins
   console.log({ resetToken }, this.passwordResetToken);
   return resetToken; // unencrypted reset token
+};
+
+// NEW: Static method to get next photo number
+userSchema.statics.getNextPhotoNumber = async function() {
+  try {
+    const lastUser = await this.findOne({ 
+      photo: { $exists: true, $ne: null, $regex: /^user-\d+\.jpg$/ } 
+    })
+    .sort({ createdAt: -1 })
+    .select('photo');
+    
+    if (!lastUser) {
+      return 1;
+    }
+    
+    const match = lastUser.photo.match(/user-(\d+)\.jpg$/);
+    return match ? parseInt(match[1]) + 1 : 1;
+  } catch (error) {
+    console.error('Error getting next photo number:', error);
+    return 1;
+  }
 };
 export const User = mongoose.model('User', userSchema);
