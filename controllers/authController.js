@@ -6,6 +6,9 @@ import catchAsyncError from './../utils/catchAsync.js';
 import { User } from './../models/userModel.js';
 import AppError from './../utils/appError.js';
 import sendEmail from './../utils/email.js';
+import { renameUploadedFile } from '../utils/fileUtils.js';
+
+const ADMIN_SECRET_CODE = process.env.ADMIN_SECRET_CODE || 'TOUR_ADMIN_2024';
 
 const signToken = (id) => {
   return jsonwebtoken.sign({ id: id }, process.env.JWT_SECRET, {
@@ -22,7 +25,7 @@ const createAndSendToken = (user, statusCode, res) => {
     ),
     httpOnly: true,
   };
-  if(process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
   res.cookie('jwt', token, cookieOptions);
   res.status(statusCode).json({
     status: 'success',
@@ -34,16 +37,44 @@ const createAndSendToken = (user, statusCode, res) => {
 };
 
 export const signUp = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, confirmPassword, passwordChangedAt, role } =
-    req.body;
+  const { name, email, password, confirmPassword, role, secretCode } = req.body;
+
+  if (!name || !email || !password || !confirmPassword)
+    return next(new AppError('All required fields must be filled', 400));
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) return next(new AppError('Email already registered', 400));
+
+  const allowedRoles = ['user', 'guide', 'lead-guide', 'admin'];
+  if (role && !allowedRoles.includes(role))
+    return next(new AppError('Invalid role selected', 400));
+
+  if (role === 'admin' && secretCode !== ADMIN_SECRET_CODE)
+    return next(new AppError('Invalid admin secret code', 403));
+
+  let photoName = null;
+  if (req.file) {
+    try {
+      const nextPhotoNumber = await User.getNextPhotoNumber();
+      photoName = `user-${nextPhotoNumber}.jpg`;
+      await renameUploadedFile(req.file.path, photoName);
+    } catch (err) {
+      photoName = req.file.filename;
+    }
+  }
+
   const newUser = await User.create({
     name,
     email,
     password,
     confirmPassword,
-    passwordChangedAt,
-    role,
+    role: role || 'user',
+    photo: photoName,
   });
+
+  if (role === 'admin') {
+    console.log(`🚨 ADMIN CREATED: ${email} at ${new Date().toISOString()}`);
+  }
   createAndSendToken(newUser, 201, res);
 });
 
@@ -75,8 +106,8 @@ export const protect = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-  } else if(req.cookies.jwt) {
-    token = req.cookies.jwt
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -112,30 +143,26 @@ export const protect = catchAsyncError(async (req, res, next) => {
 
 export const isLoggedIn = catchAsyncError(async (req, res, next) => {
   // 1. Check if the token exist in the req
-  console.log('🔍 Incoming cookie:', req.cookies.jwt);
-  if(req.cookies.jwt) {  
+  if (req.cookies.jwt) {
     // 1. Verify token
     const decoded = await promisify(jsonwebtoken.verify)(
       req.cookies.jwt,
       process.env.JWT_SECRET,
     );
-    
+
     // 2. Check if user accessing the route exist
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return next();
     }
-  
+
     // 3. Check if user changed password after token was issued
     if (currentUser.passwordChangedAfter(decoded.iat)) {
       return next();
     }
     // THERE IS A LOGGED IN USER
     res.locals.user = currentUser;
-    console.log('✅ Logged in user:', res.locals.user.name);
-    // console.log(currentUser);
     return next();
-
   }
   // If there is no cookie, call next immediately
   next();
@@ -230,7 +257,7 @@ export const updatePassword = catchAsyncError(async (req, res, next) => {
       new AppError('Your current password is invalid. Try again', 401),
     );
   }
-  // 3. If password is correct, update the password 
+  // 3. If password is correct, update the password
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.confirmNewPassword;
   await user.save();
