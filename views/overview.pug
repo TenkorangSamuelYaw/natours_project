@@ -1,8 +1,9 @@
-extend base
+extends base
 
 block content
     main.main 
         .card-container
+            //- Display tours for current page
             each tour in tours
                 .card
                     .card__header
@@ -42,11 +43,57 @@ block content
                             span.card__footer-text= `rating (${tour.ratingsQuantity})` 
                         a(class='btn btn--green btn--small' href=`/tour/${tour._id}`) Details
 
-
-
-
-
-
-
-
-//- Create the content for this page, and then inject it into the base template
+        //- Pagination section
+        if pagination && pagination.totalPages > 1
+            .pagination
+                .pagination__info
+                    p Showing #{pagination.startItem} - #{pagination.endItem} of #{pagination.totalResults} tours
+                
+                .pagination__controls
+                    //- Previous page button
+                    if pagination.currentPage > 1
+                        a(href=`/?page=${pagination.currentPage - 1}` class='btn btn--white btn--small pagination__btn')
+                            svg.pagination__icon
+                                use(xlink:href='img/icons.svg#icon-chevron-left')
+                            span Previous
+                    else
+                        span.pagination__btn.pagination__btn--disabled
+                            svg.pagination__icon
+                                use(xlink:href='img/icons.svg#icon-chevron-left')
+                            span Previous
+                    
+                    //- Page numbers
+                    .pagination__pages
+                        //- Show first page if we're far from it
+                        if pagination.currentPage > 3
+                            a(href='/?page=1' class='pagination__page') 1
+                            if pagination.currentPage > 4
+                                span.pagination__dots ...
+                        
+                        //- Show pages around current page
+                        - var startPage = Math.max(1, pagination.currentPage - 2)
+                        - var endPage = Math.min(pagination.totalPages, pagination.currentPage + 2)
+                        
+                        - for (var i = startPage; i <= endPage; i++)
+                            if i === pagination.currentPage
+                                span.pagination__page.pagination__page--active= i
+                            else
+                                a(href=`/?page=${i}` class='pagination__page')= i
+                        
+                        //- Show last page if we're far from it
+                        if pagination.currentPage < pagination.totalPages - 2
+                            if pagination.currentPage < pagination.totalPages - 3
+                                span.pagination__dots ...
+                            a(href=`/?page=${pagination.totalPages}` class='pagination__page')= pagination.totalPages
+                    
+                    //- Next page button
+                    if pagination.currentPage < pagination.totalPages
+                        a(href=`/?page=${pagination.currentPage + 1}` class='btn btn--white btn--small pagination__btn')
+                            span Next
+                            svg.pagination__icon
+                                use(xlink:href='img/icons.svg#icon-chevron-right')
+                    else
+                        span.pagination__btn.pagination__btn--disabled
+                            span Next
+                            svg.pagination__icon
+                                use(xlink:href='img/icons.svg#icon-chevron-right')
