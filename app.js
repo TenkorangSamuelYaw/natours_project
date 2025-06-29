@@ -29,35 +29,28 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-
-      // Allow JS, including blob workers and Mapbox scripts
-      scriptSrc: ["'self'", 'https://api.mapbox.com', "https://cdn.jsdelivr.net", 'blob:'],
-
-      // Allow CSS, including Google Fonts and Mapbox styles
+      scriptSrc: [
+        "'self'",
+        'https://api.mapbox.com',
+        'https://cdn.jsdelivr.net',
+        'blob:',
+        "'unsafe-inline'", // for Mapbox workers (sometimes required)
+      ],
       styleSrc: [
         "'self'",
         'https://api.mapbox.com',
         'https://fonts.googleapis.com',
         "'unsafe-inline'",
       ],
-
-      // Allow fonts from Google Fonts
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-
-      // Allow data fetches to your origin, Mapbox APIs, and Mapbox events
       connectSrc: [
         "'self'",
         'https://api.mapbox.com',
         'https://events.mapbox.com',
+        'ws://127.0.0.1:1234', // 👈 WebSocket for Parcel HMR
       ],
-
-      // Images from your server, inline data, and Mapbox tiles
       imgSrc: ["'self'", 'data:', 'https://api.mapbox.com'],
-
-      // Workers (for Mapbox’s web workers)
       workerSrc: ["'self'", 'blob:'],
-
-      // Deny everything else
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
     },

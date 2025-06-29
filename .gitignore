@@ -1,5 +1,6 @@
 # Ignore this configuration file
 config.env
+.env
 node_modules/
 .DS_Store
 
