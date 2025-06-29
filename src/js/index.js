@@ -1,16 +1,18 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
-import { login } from './login.js';
+import { login, logout } from './login.js';
 import { displayMap } from './mapBox.js';
 import { initSignup } from './signup.js';
 
 const mapElement = document.getElementById('map');
+const formElement = document.querySelector('.form');
+const logOutButton = document.querySelector('.nav__el--logout');
 if (mapElement) {
   const locations = JSON.parse(mapElement.dataset.locations);
   displayMap(locations);
 }
 
-const formElement = document.querySelector('.form');
+
 if (formElement) {
   formElement.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -19,5 +21,8 @@ if (formElement) {
     login(email, password);
   });
 }
+
+if(logOutButton) 
+  logOutButton.addEventListener('click', logout);
 
 initSignup(); // Sign up form functionality
