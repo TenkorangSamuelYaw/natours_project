@@ -98,6 +98,14 @@ export const login = catchAsyncError(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
+export const logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({status: 'success'});
+}
+
 export const protect = catchAsyncError(async (req, res, next) => {
   // 1. Check if the token exist in the req
   let token;
@@ -141,32 +149,37 @@ export const protect = catchAsyncError(async (req, res, next) => {
   next();
 });
 
-export const isLoggedIn = catchAsyncError(async (req, res, next) => {
+export const isLoggedIn = async (req, res, next) => {
   // 1. Check if the token exist in the req
   if (req.cookies.jwt) {
-    // 1. Verify token
-    const decoded = await promisify(jsonwebtoken.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET,
-    );
+    try {
+      // 1. Verify token
+      const decoded = await promisify(jsonwebtoken.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
 
-    // 2. Check if user accessing the route exist
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+      // 2. Check if user accessing the route exist
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 3. Check if user changed password after token was issued
+      if (currentUser.passwordChangedAfter(decoded.iat)) {
+        return next();
+      }
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (error) {
       return next();
     }
-
-    // 3. Check if user changed password after token was issued
-    if (currentUser.passwordChangedAfter(decoded.iat)) {
-      return next();
-    }
-    // THERE IS A LOGGED IN USER
-    res.locals.user = currentUser;
-    return next();
+    
   }
   // If there is no cookie, call next immediately
   next();
-});
+};
 
 export const restrictTo = (...roles) => {
   // 1. roles is an array of the arguments passed to it

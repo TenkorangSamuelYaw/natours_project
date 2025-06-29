@@ -121,7 +121,7 @@ export const initSignup = () => {
 
       try {
         const response = await axios.post(
-          `${baseUrl}api/v1/users/signup`,
+          `${baseUrl}/api/v1/users/signup`,
           formData,
           {
             withCredentials: true,

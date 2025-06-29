@@ -673,30 +673,33 @@ var _loginJs = require("./login.js");
 var _mapBoxJs = require("./mapBox.js");
 var _signupJs = require("./signup.js");
 const mapElement = document.getElementById('map');
+const formElement = document.querySelector('.form');
+const logOutButton = document.querySelector('.nav__el--logout');
 if (mapElement) {
     const locations = JSON.parse(mapElement.dataset.locations);
     (0, _mapBoxJs.displayMap)(locations);
 }
-const formElement = document.querySelector('.form');
 if (formElement) formElement.addEventListener('submit', (e)=>{
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     (0, _loginJs.login)(email, password);
 });
+if (logOutButton) logOutButton.addEventListener('click', (0, _loginJs.logout));
 (0, _signupJs.initSignup)();
 
 },{"./login.js":"47T64","./signup.js":"kcMzV","./mapBox.js":"2t8aZ","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ"}],"47T64":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
+parcelHelpers.export(exports, "logout", ()=>logout);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
 var _alertsJs = require("./alerts.js");
+const baseUrl = "http://127.0.0.1:3000";
 const login = async (email, password)=>{
-    const baseUrl = "http://127.0.0.1:3000/";
     try {
-        const response = await (0, _axiosDefault.default).post(`${baseUrl}api/v1/users/login`, {
+        const response = await (0, _axiosDefault.default).post(`${baseUrl}/api/v1/users/login`, {
             email: email,
             password: password
         }, {
@@ -710,6 +713,14 @@ const login = async (email, password)=>{
         }
     } catch (error) {
         (0, _alertsJs.showAlert)('error', error.response.data.message);
+    }
+};
+const logout = async ()=>{
+    try {
+        const response = await (0, _axiosDefault.default).get(`${baseUrl}/api/v1/users/logout`);
+        if (response.data.status === 'success') location.reload(true);
+    } catch (error) {
+        (0, _alertsJs.showAlert)("error", 'Error logging out! Try again.'); // Maybe internet issues
     }
 };
 
@@ -5543,7 +5554,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initSignup", ()=>initSignup);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
-const baseUrl = "http://127.0.0.1:3000/";
+const baseUrl = "http://127.0.0.1:3000";
 const initSignup = ()=>{
     document.addEventListener('DOMContentLoaded', function() {
         const avatarFile = document.getElementById('avatarFile');
@@ -5629,7 +5640,7 @@ const initSignup = ()=>{
             formData.append('secretCode', secretCode);
             if (avatarFile) formData.append('avatar', avatarFile);
             try {
-                const response = await (0, _axiosDefault.default).post(`${baseUrl}api/v1/users/signup`, formData, {
+                const response = await (0, _axiosDefault.default).post(`${baseUrl}/api/v1/users/signup`, formData, {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'multipart/form-data'
