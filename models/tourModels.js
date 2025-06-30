@@ -25,6 +25,10 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxlength: [50, 'A tour must have 50 characters maximum'],
     },
+    // slug Wasn't part of the schema definition initially, that's why the slug name wasn't showing
+    slug: {
+      type: String,
+    },
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration'],
@@ -107,11 +111,11 @@ const tourSchema = new mongoose.Schema(
         type: String,
         default: 'Point',
         enum: ['Point'],
-        required: true
+        required: true,
       },
       coordinates: {
         type: [Number],
-        required: true
+        required: true,
       }, // Accepts an array of numbers (LON first before LAT)
       address: String,
       description: String,
@@ -163,7 +167,7 @@ tourSchema.virtual('durationWeeks').get(function () {
 // NOTE Document middleware implemented here.
 // Called before a document is saved to the database
 tourSchema.pre('save', function(next) {
-  this.slug = slugify(this.name, {lower: true}); // slugify converts the string passed to it as a url friendly string
+  this.slug = slugify(this.name, { lower: true, replacement: '-' }); // slugify converts the string passed to it as a url friendly string
   next();
 });
 

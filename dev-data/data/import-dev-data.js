@@ -39,7 +39,11 @@ const reviews = JSON.parse(fs.readFileSync(`${__dirname}/./reviews.json`, 'utf-8
 // IMPORT DATA INTO THE DATABASE
 const importData = async () => {
     try {
-        await Tour.create(tours); // Each object in the tours array is treated as a document
+        // await Tour.create(tours); // Each object in the tours array is treated as a document
+        for (let tourData of tours) {
+          const tour = new Tour(tourData);
+          await tour.save(); // This triggers pre('save')
+        }
         await User.create(users, {validateBeforeSave: false}); // Each object in the users array is treated as a document
         await Review.create(reviews); // Each object in the reviews array is treated as a document
         console.log('Data successfully loaded');
