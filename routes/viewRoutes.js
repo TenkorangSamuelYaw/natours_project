@@ -13,7 +13,7 @@ const router = express.Router();
 router.use(isLoggedIn); // Use this middleware to see if the user is logged in or not(protect is primarily for protected routes)
 
 router.route('/').get(getOverview);
-router.route('/tour/:id').get(getTour);
+router.route('/tour/:slug').get(getTour);
 router.route('/login').get(getLoginForm);
 router.route('/signup').get(getSignUpForm);
 

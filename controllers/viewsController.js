@@ -1,6 +1,7 @@
 import { title } from "process";
 import { Tour } from "./../models/tourModels.js";
 import catchAsyncError from "./../utils/catchAsync.js";
+import AppError from "./../utils/appError.js";
 
 
 export const getOverview = catchAsyncError(async (req, res, next) => {
@@ -43,13 +44,16 @@ export const getOverview = catchAsyncError(async (req, res, next) => {
 
 export const getTour = catchAsyncError(async (req, res, next) => {
   //TODO 1. Get tour data from DB, populate it with the reviews data, the guide data is already prepopulated
-  const tour = await Tour.findOne({ _id: req.params.id })
+  const tour = await Tour.findOne({ slug: req.params.slug })
     .populate({
       path: 'reviews',
       select: {
         review: 1, rating: 1, user: 1
       }
     });
+    if(!tour) {
+      return next(new AppError(`There's no tour with that name ${req.params.slug}`, 404));
+    }
 
   //TODO 2. Build the template
 
