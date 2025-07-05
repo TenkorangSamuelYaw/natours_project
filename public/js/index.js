@@ -5554,6 +5554,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initSignup", ()=>initSignup);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
+var _alertsJs = require("./alerts.js");
 const baseUrl = "http://127.0.0.1:3000";
 const initSignup = ()=>{
     document.addEventListener('DOMContentLoaded', function() {
@@ -5647,7 +5648,7 @@ const initSignup = ()=>{
                     }
                 });
                 if (response.data.status === 'success') {
-                    alert('Signup successful!');
+                    (0, _alertsJs.showAlert)('success', 'Signup successful!');
                     setTimeout(()=>{
                         location.assign('/');
                     }, 1000);
@@ -5677,7 +5678,7 @@ const initSignup = ()=>{
     });
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","axios":"jo6P5"}],"2t8aZ":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","axios":"jo6P5","./alerts.js":"ccxpI"}],"2t8aZ":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "displayMap", ()=>displayMap);
