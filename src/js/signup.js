@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { showAlert } from './alerts.js';
 const baseUrl = process.env.PUBLIC_BASE_URL;
 
 export const initSignup = () => {
@@ -132,7 +132,7 @@ export const initSignup = () => {
         );
 
         if (response.data.status === 'success') {
-          alert('Signup successful!');
+          showAlert('success', 'Signup successful!');
           setTimeout(() => {
             location.assign('/');
           }, 1000);
