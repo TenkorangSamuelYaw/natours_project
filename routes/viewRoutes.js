@@ -4,18 +4,18 @@ import {
   getTour,
   getLoginForm,
   getSignUpForm,
+  getAccount,
 } from './../controllers/viewsController.js';
 
-import { isLoggedIn } from './../controllers/authController.js';
+import { isLoggedIn, protect } from './../controllers/authController.js';
 
 const router = express.Router();
 
-router.use(isLoggedIn); // Use this middleware to see if the user is logged in or not(protect is primarily for protected routes)
-
-router.route('/').get(getOverview);
-router.route('/tour/:slug').get(getTour);
-router.route('/login').get(getLoginForm);
-router.route('/signup').get(getSignUpForm);
+router.route('/').get(isLoggedIn, getOverview);
+router.route('/tour/:slug').get(isLoggedIn, getTour);
+router.route('/login').get(isLoggedIn, getLoginForm);
+router.route('/signup').get(isLoggedIn, getSignUpForm);
+router.route('/me').get(protect, getAccount);
 
 
 export default router;

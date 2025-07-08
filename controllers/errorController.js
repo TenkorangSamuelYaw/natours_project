@@ -51,7 +51,7 @@ const sendErrorDev = (err, req, res) => {
 };
 
 const sendErrorProd = (err, req, res) => {
-  const isAPI = req.originalUrl.startsWith('/api');
+  const isAPI = req.originalUrl.startsWith('/api'); 
 
   if (isAPI) {
     // Operational errors coming from Moongose or somewhere we trust
@@ -74,7 +74,7 @@ const sendErrorProd = (err, req, res) => {
   }
 
   console.error('ERROR 🔥', err);
-  return renderErrorPage(res, err.statusCode, 'Please try again');
+  return renderErrorPage(res, err.statusCode, 'Please try again'); 
 };
 
 

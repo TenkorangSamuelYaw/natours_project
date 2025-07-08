@@ -1,8 +1,7 @@
-import { title } from "process";
-import { Tour } from "./../models/tourModels.js";
-import catchAsyncError from "./../utils/catchAsync.js";
-import AppError from "./../utils/appError.js";
-
+import { title } from 'process';
+import { Tour } from './../models/tourModels.js';
+import catchAsyncError from './../utils/catchAsync.js';
+import AppError from './../utils/appError.js';
 
 export const getOverview = catchAsyncError(async (req, res, next) => {
   // TODO 1. Get all tours from Tour DB
@@ -38,22 +37,25 @@ export const getOverview = catchAsyncError(async (req, res, next) => {
   res.status(200).render('overview', {
     title: 'All tours',
     tours: tours,
-    pagination: totalPages > 1 ? pagination : null
+    pagination: totalPages > 1 ? pagination : null,
   });
 });
 
 export const getTour = catchAsyncError(async (req, res, next) => {
   //TODO 1. Get tour data from DB, populate it with the reviews data, the guide data is already prepopulated
-  const tour = await Tour.findOne({ slug: req.params.slug })
-    .populate({
-      path: 'reviews',
-      select: {
-        review: 1, rating: 1, user: 1
-      }
-    });
-    if(!tour) {
-      return next(new AppError(`There's no tour with that name ${req.params.slug}`, 404));
-    }
+  const tour = await Tour.findOne({ slug: req.params.slug }).populate({
+    path: 'reviews',
+    select: {
+      review: 1,
+      rating: 1,
+      user: 1,
+    },
+  });
+  if (!tour) {
+    return next(
+      new AppError(`There's no tour with that name ${req.params.slug}`, 404),
+    );
+  }
 
   //TODO 2. Build the template
 
@@ -68,11 +70,17 @@ export const getTour = catchAsyncError(async (req, res, next) => {
 export const getLoginForm = async (req, res) => {
   res.status(200).render('login', {
     title: 'Login into your account',
-  })
-}
+  });
+};
 
 export const getSignUpForm = async (req, res) => {
   res.status(200).render('signup', {
     title: 'Create an account',
-  })
-}
+  });
+};
+
+export const getAccount = (req, res) => {
+  res.status(200).render('account', {
+    title: 'Your account',
+  });
+};
