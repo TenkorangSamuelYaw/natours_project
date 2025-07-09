@@ -62,6 +62,8 @@ app.use(express.json({
   limit: '10kb' // Limit data parsed in req.body to 10KB
 })); 
 
+app.use(express.urlencoded({extended: true, limit: '10kb'}));
+
 app.use(cookieParser()); // read cookie from the browser when user makes a request
 
 // Data sanitization against NO SQL query injection

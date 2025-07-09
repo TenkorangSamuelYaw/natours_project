@@ -9,9 +9,16 @@ mixin navItem(link, text, icon, active)
 
 
 mixin formGroup(labelText, inputId, inputType, inputPlaceholder = '', inputValue = '', isRequired = true, extraClasses = '', attributes = {})
-    .form__group(class=extraClasses)
-        label.form__label(for=inputId)= labelText
-        input.form__input(id=inputId type=inputType placeholder=inputPlaceholder value=inputValue required=isRequired ? true : undefined)&attributes(attributes)
+  - const finalAttributes = { name: inputId, ...attributes };
+  .form__group(class=extraClasses)
+    label.form__label(for=inputId)= labelText
+    input.form__input(
+      id=inputId
+      type=inputType
+      placeholder=inputPlaceholder
+      value=inputValue
+      required=isRequired ? true : undefined
+    )&attributes(finalAttributes)
 
 block content
     main.main
@@ -35,9 +42,12 @@ block content
             .user-view__content
                 .user-view__form-container
                     h2.heading-secondary.ma-bt-md Your account settings
+                    //- Without API
+                    //- form.form.form-user-data(action='/submit-user-data' method='POST')
+                    //- With API
                     form.form.form-user-data
-                        +formGroup('Name', 'name', 'text', '', `${user.name}`)
-                        +formGroup('Email address', 'email', 'email', '', `${user.email}`, true, 'ma-bt-md')
+                        +formGroup('Name', 'name', 'text', '', `${user.name}`, true, '', { name: 'name' })
+                        +formGroup('Email address', 'email', 'email', '', `${user.email}`, true, 'ma-bt-md', { name: 'email' })
                         .form__group.form__photo-upload
                             img.form__user-photo(src=`img/users/${user.photo}`, alt='User photo')
                             a.btn-text(href='') Choose new photo
@@ -46,7 +56,7 @@ block content
                 .line &nbsp;
                 .user-view__form-container
                     h2.heading-secondary.ma-bt-md Password change
-                    form.form.form-user-settings
+                    form.form.form-user-password
                         +formGroup('Current password', 'password-current', 'password', '••••••••', '', true, '', { minlength: '8' })
                         +formGroup('New password', 'password', 'password', '••••••••', '', true, '', { minlength: '8' })
                         +formGroup('Confirm password', 'password-confirm', 'password', '••••••••', '', true, 'ma-bt-lg', { minlength: '8' })

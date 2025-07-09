@@ -5,6 +5,7 @@ import {
   getLoginForm,
   getSignUpForm,
   getAccount,
+  updateUserData,
 } from './../controllers/viewsController.js';
 
 import { isLoggedIn, protect } from './../controllers/authController.js';
