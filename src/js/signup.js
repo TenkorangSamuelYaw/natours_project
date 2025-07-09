@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { showAlert } from './alerts.js';
 const baseUrl = process.env.PUBLIC_BASE_URL;
+const loader = document.getElementById('loader');
 
 export const initSignup = () => {
   document.addEventListener('DOMContentLoaded', function () {
@@ -107,7 +108,6 @@ export const initSignup = () => {
       secretCode,
       avatarFile,
     ) => {
-      
       const formData = new FormData();
       formData.append('name', name);
       formData.append('email', email);
@@ -119,6 +119,8 @@ export const initSignup = () => {
         formData.append('avatar', avatarFile);
       }
 
+      // 🔁 Show loader
+      loader?.classList.remove('hidden');
       try {
         const response = await axios.post(
           `${baseUrl}/api/v1/users/signup`,
@@ -139,6 +141,9 @@ export const initSignup = () => {
         }
       } catch (error) {
         console.log(error.response?.data?.message || error.message);
+      } finally {
+        // ✅ Hide loader after request finishes
+        loader?.classList.add('hidden');
       }
     };
 

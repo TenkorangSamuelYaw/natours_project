@@ -19,11 +19,13 @@ if (mapElement) {
 
 
 if (formElement) {
-  formElement.addEventListener('submit', (e) => {
+  formElement.addEventListener('submit', async (e) => {
     e.preventDefault();
+    loader.classList.remove('hidden'); // 🔁 Show loading
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    login(email, password);
+    await login(email, password);
+    loader.classList.add('hidden'); // ✅ Hide loading
   });
 }
 
