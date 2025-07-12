@@ -5,11 +5,11 @@ block content
       h1.title CREATE YOUR ACCOUNT
       
       form#signupForm.signupForm(enctype="multipart/form-data")
-        .avatar-upload
-          .avatar-preview#avatarPreview
-            .avatar-placeholder Click to add photo
-          input(type="file", id="avatarFile", name="avatar", accept="image/*")
-          label.avatar-label(for="avatarFile") Choose Profile Picture
+        .photo-upload
+          .photo-preview#photoPreview
+            .photo-placeholder Click to add photo
+          input(type="file", id="photoFile", name="photo", accept="image/*")
+          label.photo-label(for="photoFile") Choose Profile Picture
         
         .form-group
           label(for="firstName") First Name

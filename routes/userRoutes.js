@@ -26,7 +26,7 @@ import { handleMulterError } from '../utils/handleMulterError.js';
 const router = express.Router();
 
 // You don't need to be logged in to perform any of the actions below
-router.post('/signup', router.post('/signup', uploadUserPhoto, handleMulterError, signUp));
+router.post('/signup', uploadUserPhoto, handleMulterError, signUp);
 router.post('/login', login);
 router.get('/logout', logout);
 router.post('/forgotPassword', forgotPassword);
@@ -37,7 +37,7 @@ router.patch('/resetPassword/:token', resetPassword);
 router.use(protect);
 router.patch('/updateMyPassword', updatePassword);
 router.get('/me', getMe, getUser);
-router.patch('/updateMe', updateMe);
+router.patch('/updateMe', uploadUserPhoto, handleMulterError, updateMe);
 router.delete('/deleteMe', deleteMe); // When the user deletes his account, it is not removed but made inactive
 
 // Only admins can perform the actions below

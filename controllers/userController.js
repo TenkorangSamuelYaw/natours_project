@@ -1,5 +1,9 @@
+import path from 'path';
+import fs from 'fs/promises';
+import { filterObject } from '../utils/filterObject.js';
+import { renameUploadedFile } from '../utils/fileUtils.js';
 import AppError from '../utils/appError.js';
-import {User} from './../models/userModel.js';
+import { User } from './../models/userModel.js';
 import catchAsyncError from './../utils/catchAsync.js';
 import { deleteOne, getAll, getOne, updateOne } from './handlerFactory.js';
 
@@ -7,42 +11,70 @@ import { deleteOne, getAll, getOne, updateOne } from './handlerFactory.js';
 export const getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
-}
+};
 
 // NOTE User data updated here, user password updated in the authController
 export const updateMe = catchAsyncError(async (req, res, next) => {
-  // 1. Check and create error if user tried to update password
   if (req.body.password || req.body.confirmPassword) {
-    next(new AppError('This route is not for paasword update. Please use /updateMyPassword', 400));
+    return next(
+      new AppError(
+        'This route is not for password updates. Use /updateMyPassword.',
+        400,
+      ),
+    );
   }
 
-  // 2. If not update user document
-  // NOTE Can't use user.save() here because some fields like password are required and we're not updating those fields
-  const {name, email} = req.body;
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user.id,
-    { name, email },
-    { new: true, runValidators: true },
-  );
+  // Handle uploaded file
+  if (req.file) {
+    const ext = path.extname(req.file.originalname);
+    let photoName;
+
+    if (req.user.photo) {
+      photoName = req.user.photo;
+    } else {
+      photoName = `user-${req.user.id}-${Date.now()}${ext}`;
+    }
+
+    await renameUploadedFile(req.file.path, photoName);
+
+    // Delete old photo if a new name is generated
+    if (req.user.photo && photoName !== req.user.photo) {
+      const oldPath = path.join('public/img/users', req.user.photo);
+      try {
+        await fs.unlink(oldPath);
+      } catch (err) {
+        console.warn(`⚠️ Failed to delete old photo: ${err.message}`);
+      }
+    }
+
+    req.body.photo = photoName;
+  }
+
+  // Only allow name, email, photo fields to be updated
+  const filteredBody = filterObject(req.body, 'name', 'email', 'photo');
+
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
+
   res.status(200).json({
     status: 'success',
     data: {
-      user: updatedUser
-    }
-  })
+      user: updatedUser,
+    },
+  });
 });
 
 export const deleteMe = catchAsyncError(async (req, res, next) => {
   // We don't necessarily delete the user, we set the active property to false(this way, they can reactivate their account)
-  await User.findByIdAndUpdate(req.user.id, {active: false});
+  await User.findByIdAndUpdate(req.user.id, { active: false });
   // Because the active is set to fault, make sure all the query returns doesn't include the documents with active = false
   res.status(204).json({
     status: 'success',
-    data: null
+    data: null,
   });
-})
-
-
+});
 
 // NOTE Implemented in the authentication handler
 export const createUser = (req, res) => {

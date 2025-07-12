@@ -7,6 +7,7 @@ import { User } from './../models/userModel.js';
 import AppError from './../utils/appError.js';
 import sendEmail from './../utils/email.js';
 import { renameUploadedFile } from '../utils/fileUtils.js';
+import path from 'path';
 
 const ADMIN_SECRET_CODE = process.env.ADMIN_SECRET_CODE || 'TOUR_ADMIN_2024';
 
@@ -52,11 +53,11 @@ export const signUp = catchAsyncError(async (req, res, next) => {
   if (role === 'admin' && secretCode !== ADMIN_SECRET_CODE)
     return next(new AppError('Invalid admin secret code', 403));
 
-  let photoName = null;
+  let photoName;
   if (req.file) {
     try {
-      const nextPhotoNumber = await User.getNextPhotoNumber();
-      photoName = `user-${nextPhotoNumber}.jpg`;
+      const ext = path.extname(req.file.originalname);
+      photoName = `user-${req.user.id}-${Date.now()}${ext}`; 
       await renameUploadedFile(req.file.path, photoName);
     } catch (err) {
       photoName = req.file.filename;
@@ -69,7 +70,7 @@ export const signUp = catchAsyncError(async (req, res, next) => {
     password,
     confirmPassword,
     role: role || 'user',
-    photo: photoName,
+    photo: photoName || undefined,
   });
 
   if (role === 'admin') {

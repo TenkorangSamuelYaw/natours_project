@@ -88,7 +88,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Creating my own middleware here
 app.use((req, res, next) => {
     req.responseTime = new Date().toISOString();
-    console.log(req.cookies); // Log the cookie coming from the req
     next();
 });
 

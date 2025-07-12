@@ -5,8 +5,8 @@ const loader = document.getElementById('loader');
 
 export const initSignup = () => {
   document.addEventListener('DOMContentLoaded', function () {
-    const avatarFile = document.getElementById('avatarFile');
-    const avatarPreview = document.getElementById('avatarPreview');
+    const photoFile = document.getElementById('photoFile');
+    const photoPreview = document.getElementById('photoPreview');
     const roleRadios = document.querySelectorAll('input[name="role"]');
     const adminModal = document.getElementById('adminModal');
     const adminSecretInput = document.getElementById('adminSecretInput');
@@ -20,21 +20,21 @@ export const initSignup = () => {
 
     let selectedAdminRole = false;
 
-    avatarFile?.addEventListener('change', function (e) {
+    photoFile?.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          avatarPreview.style.backgroundImage = `url(${e.target.result})`;
-          avatarPreview.classList.add('has-image');
-          avatarPreview.innerHTML = '';
+          photoPreview.style.backgroundImage = `url(${e.target.result})`;
+          photoPreview.classList.add('has-image');
+          photoPreview.innerHTML = '';
         };
         reader.readAsDataURL(file);
       }
     });
 
-    avatarPreview?.addEventListener('click', function () {
-      avatarFile.click();
+    photoPreview?.addEventListener('click', function () {
+      photoFile.click();
     });
 
     roleRadios.forEach((radio) => {
@@ -106,7 +106,7 @@ export const initSignup = () => {
       confirmPassword,
       role,
       secretCode,
-      avatarFile,
+      photoFile,
     ) => {
       const formData = new FormData();
       formData.append('name', name);
@@ -115,8 +115,8 @@ export const initSignup = () => {
       formData.append('confirmPassword', confirmPassword);
       formData.append('role', role);
       formData.append('secretCode', secretCode);
-      if (avatarFile) {
-        formData.append('avatar', avatarFile);
+      if (photoFile) {
+        formData.append('photo', photoFile);
       }
 
       // 🔁 Show loader
@@ -158,8 +158,8 @@ export const initSignup = () => {
       const role =
         document.querySelector('input[name="role"]:checked')?.value || 'user';
       const secretCode = secretCodeInput.value.trim();
-      const avatarInput = document.getElementById('avatarFile');
-      const avatarFile = avatarInput?.files[0];
+      const photoInput = document.getElementById('photoFile');
+      const photoFile = photoInput?.files[0];
 
       if (role === 'admin' && !secretCode) {
         showAdminModal();
@@ -174,7 +174,7 @@ export const initSignup = () => {
         confirmPassword,
         role,
         secretCode,
-        avatarFile,
+        photoFile,
       );
     });
   });

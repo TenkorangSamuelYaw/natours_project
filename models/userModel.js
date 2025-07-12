@@ -34,7 +34,10 @@ const userSchema = new mongoose.Schema(
         message: "Passwords don't match",
       },
     },
-    photo: String, // Keep your existing photo field - this will store the sequential naming
+    photo: {
+      type: String,
+      default: 'default.jpg'
+    },
     passwordChangedAt: Date,
     role: {
       type: String,
@@ -144,26 +147,5 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // Expires in 10 mins
   console.log({ resetToken }, this.passwordResetToken);
   return resetToken; // unencrypted reset token
-};
-
-// NEW: Static method to get next photo number
-userSchema.statics.getNextPhotoNumber = async function() {
-  try {
-    const lastUser = await this.findOne({ 
-      photo: { $exists: true, $ne: null, $regex: /^user-\d+\.jpg$/ } 
-    })
-    .sort({ createdAt: -1 })
-    .select('photo');
-    
-    if (!lastUser) {
-      return 1;
-    }
-    
-    const match = lastUser.photo.match(/user-(\d+)\.jpg$/);
-    return match ? parseInt(match[1]) + 1 : 1;
-  } catch (error) {
-    console.error('Error getting next photo number:', error);
-    return 1;
-  }
 };
 export const User = mongoose.model('User', userSchema);

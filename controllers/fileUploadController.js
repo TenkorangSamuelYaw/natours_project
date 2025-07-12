@@ -17,4 +17,4 @@ export const uploadUserPhoto = multer({
   storage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
-}).single('avatar');
+}).single('photo');
