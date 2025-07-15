@@ -34,6 +34,7 @@
     "path": "^0.12.7",
     "pug": "^3.0.3",
     "regenerator-runtime": "^0.14.1",
+    "sharp": "^0.34.3",
     "slugify": "^1.6.6",
     "validator": "^13.12.0"
   },

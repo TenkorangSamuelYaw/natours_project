@@ -53,29 +53,33 @@ export const signUp = catchAsyncError(async (req, res, next) => {
   if (role === 'admin' && secretCode !== ADMIN_SECRET_CODE)
     return next(new AppError('Invalid admin secret code', 403));
 
-  let photoName;
-  if (req.file) {
-    try {
-      const ext = path.extname(req.file.originalname);
-      photoName = `user-${req.user.id}-${Date.now()}${ext}`; 
-      await renameUploadedFile(req.file.path, photoName);
-    } catch (err) {
-      photoName = req.file.filename;
-    }
-  }
-
   const newUser = await User.create({
     name,
     email,
     password,
     confirmPassword,
     role: role || 'user',
-    photo: photoName || undefined,
+    photo: req.body.photo || undefined,
   });
+
+  // Optional: Rename the photo file now that we have the user's real ID
+  if (req.file && req.body.photo?.startsWith('user-temp')) {
+    const newFileName = `user-${newUser._id}-${Date.now()}.jpeg`;
+    const oldPath = path.join('public/img/users', req.body.photo);
+    const newPath = path.join('public/img/users', newFileName);
+    try {
+      await fs.rename(oldPath, newPath);
+      newUser.photo = newFileName;
+      await newUser.save({ validateBeforeSave: false });
+    } catch (err) {
+      console.warn(`⚠️ Failed to rename photo: ${err.message}`);
+    }
+  }
 
   if (role === 'admin') {
     console.log(`🚨 ADMIN CREATED: ${email} at ${new Date().toISOString()}`);
   }
+
   createAndSendToken(newUser, 201, res);
 });
 

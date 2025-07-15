@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { filterObject } from '../utils/filterObject.js';
-import { renameUploadedFile } from '../utils/fileUtils.js';
+import { renameUploadedFile } from './../utils/fileUtils.js';
 import AppError from '../utils/appError.js';
 import { User } from './../models/userModel.js';
 import catchAsyncError from './../utils/catchAsync.js';
@@ -23,33 +23,6 @@ export const updateMe = catchAsyncError(async (req, res, next) => {
       ),
     );
   }
-
-  // Handle uploaded file
-  if (req.file) {
-    const ext = path.extname(req.file.originalname);
-    let photoName;
-
-    if (req.user.photo) {
-      photoName = req.user.photo;
-    } else {
-      photoName = `user-${req.user.id}-${Date.now()}${ext}`;
-    }
-
-    await renameUploadedFile(req.file.path, photoName);
-
-    // Delete old photo if a new name is generated
-    if (req.user.photo && photoName !== req.user.photo) {
-      const oldPath = path.join('public/img/users', req.user.photo);
-      try {
-        await fs.unlink(oldPath);
-      } catch (err) {
-        console.warn(`⚠️ Failed to delete old photo: ${err.message}`);
-      }
-    }
-
-    req.body.photo = photoName;
-  }
-
   // Only allow name, email, photo fields to be updated
   const filteredBody = filterObject(req.body, 'name', 'email', 'photo');
 
