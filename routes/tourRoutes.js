@@ -1,7 +1,8 @@
 import express from 'express';
 import {getMonthlyPlan, getTourStats, aliasTopTours ,getTours, getTour, getToursWithin, createTour, updateTour, deleteTour, getDistances, getNearbyToursWithDistance } from '../controllers/tourController.js';
 import { protect, restrictTo } from './../controllers/authController.js';
-import reviewRouter from './../routes/reviewRoutes.js'
+import reviewRouter from './../routes/reviewRoutes.js';
+import {uploadTourImages, resizeTourPhotos, attachTour } from '../controllers/fileUploadController.js';
 
 
 const router = express.Router();
@@ -40,7 +41,7 @@ router
 router
 .route('/:id')
 .get(getTour)
-.patch(protect, restrictTo('admin', 'lead-guide'), updateTour)
+.patch(protect, restrictTo('admin', 'lead-guide'), attachTour, uploadTourImages, resizeTourPhotos, updateTour)
 .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
 
 export default router; 

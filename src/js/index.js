@@ -35,9 +35,14 @@ if (userDataForm) {
     e.preventDefault();
     loader.classList.remove('hidden'); // 🔁 Show loading
     // saveBtn.disabled = true;
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    await updateSettings({name, email}, 'data');
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    const fileInput = document.getElementById('photo');
+    if (fileInput.files.length > 0) {
+      form.append('photo', fileInput.files[0]);
+    }
+    await updateSettings(form, 'data');
     loader.classList.add('hidden'); // ✅ Hide loading
     // saveBtn.disabled = false;
   });

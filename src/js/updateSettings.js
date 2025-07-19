@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import { showAlert } from './alerts.js';
 import { showAlert } from './alerts.js';
 const baseUrl = process.env.PUBLIC_BASE_URL;
 
@@ -15,6 +14,9 @@ export const updateSettings = async (data, type) => {
         });
         if (response.data.status === 'success') {
           showAlert('success', `${type.toUpperCase()} updated successfully!`);
+          window.setTimeout(() => {
+            location.assign('/me');
+          }, 500);
         }
     } catch (error) {
         console.log(error.response.data.message);
