@@ -11,7 +11,7 @@ process.on('uncaughtException', (err) => {
 
 import app from './app.js';
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 // CONNECT TO THE DATABASE HERE
 const database = process.env.DATABASE.replace(
   '<db_password>',

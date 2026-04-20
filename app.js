@@ -6,15 +6,15 @@ import { fileURLToPath } from 'url';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
-import viewRouter from './routes/viewRoutes.js'
+import viewRouter from './routes/viewRoutes.js';
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
-import {rateLimit} from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import monogoSanitize from 'express-mongo-sanitize';
-import {xss} from 'express-xss-sanitizer';
+import { xss } from 'express-xss-sanitizer';
 import hpp from 'hpp';
-import cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +31,9 @@ app.use(
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'ws://127.0.0.1:1234',
         'https://api.mapbox.com',
         'https://cdn.jsdelivr.net',
         'blob:',
@@ -58,11 +61,13 @@ app.use(
 );
 
 // Middleware that parses data from the client to the server using req.body
-app.use(express.json({
-  limit: '10kb' // Limit data parsed in req.body to 10KB
-})); 
+app.use(
+  express.json({
+    limit: '10kb', // Limit data parsed in req.body to 10KB
+  }),
+);
 
-app.use(express.urlencoded({extended: true, limit: '10kb'}));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 app.use(cookieParser()); // read cookie from the browser when user makes a request
 
@@ -78,7 +83,7 @@ if (process.env.NODE_ENV === 'development') {
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Allow 100 requests from same IP per which window(15 mins)
-  message: "Too many requests from this IP, please try again in 15 minutes!"
+  message: 'Too many requests from this IP, please try again in 15 minutes!',
 });
 app.use('/api', limiter); // Apply to all routes another /api
 
@@ -87,24 +92,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Creating my own middleware here
 app.use((req, res, next) => {
-    req.responseTime = new Date().toISOString();
-    next();
+  req.responseTime = new Date().toISOString();
+  next();
 });
 
 // Data sanitization against XSS
 app.use(xss());
 
 // Prevent parameter pollution
-app.use(hpp({
-  whitelist: [
-    'duration',
-    'ratingsQuantity',
-    'ratingsAverage',
-    'maxGroupSize',
-    'difficulty',
-    'price'
-  ]
-}));
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  }),
+);
 
 // 3. Mounting routers
 app.use('/', viewRouter); // All view routes mounted on the root route
@@ -119,7 +126,6 @@ app.all('*', (req, res, next) => {
 });
 
 // NOTE ERROR HANDLING MIDDLEWARE (4) ARGUMENTS
-app.use(globalErrorHandler); 
+app.use(globalErrorHandler);
 
 export default app;
-

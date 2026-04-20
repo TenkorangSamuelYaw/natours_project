@@ -20,7 +20,12 @@ export const login = async (email, password) => {
           }, 1000);
         }
     } catch (error) {
-        showAlert('error', error.response.data.message);
+        // showAlert('error', error.response.data.message);
+        console.error('Login error:', error);
+        showAlert(
+          'error',
+          error.response?.data?.message || 'Something went wrong!',
+        );
     }
 }
 

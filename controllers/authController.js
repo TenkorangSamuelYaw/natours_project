@@ -5,9 +5,10 @@ import jsonwebtoken from 'jsonwebtoken';
 import catchAsyncError from './../utils/catchAsync.js';
 import { User } from './../models/userModel.js';
 import AppError from './../utils/appError.js';
-import sendEmail from './../utils/email.js';
+import Email from './../utils/email.js';
 import { renameUploadedFile } from '../utils/fileUtils.js';
 import path from 'path';
+import { url } from 'inspector';
 
 const ADMIN_SECRET_CODE = process.env.ADMIN_SECRET_CODE || 'TOUR_ADMIN_2024';
 
@@ -79,7 +80,9 @@ export const signUp = catchAsyncError(async (req, res, next) => {
   if (role === 'admin') {
     console.log(`🚨 ADMIN CREATED: ${email} at ${new Date().toISOString()}`);
   }
-
+  const url = `${req.protocol}://${req.get('host')}/login`;
+  console.log(url);
+  await new Email(newUser, url).sendWelcome();
   createAndSendToken(newUser, 201, res);
 });
 
