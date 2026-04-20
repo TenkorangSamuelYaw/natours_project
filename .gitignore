@@ -3,6 +3,8 @@ config.env
 .env
 node_modules/
 .DS_Store
+public/js/index.js
+public/js/index.js.map
 
 # Logs
 logs

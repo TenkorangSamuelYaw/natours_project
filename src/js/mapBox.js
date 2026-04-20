@@ -1,6 +1,5 @@
 export const displayMap = locations => {
-    mapboxgl.accessToken =
-        'pk.eyJ1Ijoic3l0ZW5rb3JhbmciLCJhIjoiY21jMzlvbDFlMDJtZjJtczh5cGw3bHJ5aiJ9.h21y9iPUi8dvKw0UiM3MTg';
+    mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN ;
     const map = new mapboxgl.Map({
         container: 'map', // container ID
         style: 'mapbox://styles/sytenkorang/cmc451ga8020j01sc1ru2b225', // style URL
